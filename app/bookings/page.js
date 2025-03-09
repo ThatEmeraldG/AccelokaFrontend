@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 
 const BookingPage = () => {
   const [bookedTicketId, setBookedTicketId] = useState(0);
+  const [quantity, setQuantity] = useState(0);
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleFetchBooking = async () => {
     if (!bookedTicketId) return alert("Please enter a Booked Ticket ID (numbers)");
     console.log("BookedTicketId in bookings/page.js: ", bookedTicketId);
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/bookings/get-booked-ticket?bookedTicketId=${bookedTicketId}`);
@@ -31,10 +32,15 @@ const BookingPage = () => {
     if (!bookedTicketId || !ticketCode || !qty) return alert("Invalid parameters");
 
     try {
-      const response = await fetch(
-        `/api/bookings/revoke-ticket?bookedTicketId=${bookedTicketId}&ticketCode=${ticketCode}&qty=${qty}`,
-        { method: "DELETE" }
-      );
+      const response = await fetch(`/api/bookings/revoke-ticket`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookedTicketId,
+          ticketCode,
+          qty,
+        }),
+      });
       if (!response.ok) throw new Error("Failed to revoke ticket");
       alert("Ticket revoked successfully");
       handleFetchBooking();
@@ -104,13 +110,36 @@ const BookingPage = () => {
                       <p>Event Start: {ticket.eventStart}</p>
                       <p>Event End: {ticket.eventEnd}</p>
                       <p>Quantity: {ticket.quantity}</p>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleRevokeTicket(ticket.ticketCode, 1)}
-                        className="mt-1"
-                      >
-                        Revoke 1 Ticket
-                      </Button>
+
+                      <div className="flex items-center mt-2">
+                        <Label className="min-w-[140px]">Delete Ticket</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          className="flex-1 max-w-[150px] mx-4"
+                          value={quantity}
+                          onChange={(e) => {
+                            const value = Number(e.target.value);
+                            if (value >= 1) {
+                              setQuantity(value);
+                            }
+                          }}
+                          placeholder="Enter Delete Quantity"
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            if (quantity > 0) {
+                              handleRevokeTicket(ticket.ticketCode, quantity)
+                            } else {
+                              alert("Please enter a valid quantity to revoke");
+                            }
+                          }}
+                          className="mt-2 text-white hover:cursor-pointer"
+                        >
+                          Revoke Ticket
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -118,7 +147,7 @@ const BookingPage = () => {
             ))}
           </div>
 
-          <Button onClick={handleEditBooking} variant="secondary">
+          <Button onClick={handleEditBooking} variant="secondary" size={"lg"} className="mt-4 text-white hover:cursor-pointer">
             Edit Booked Ticket
           </Button>
         </div>

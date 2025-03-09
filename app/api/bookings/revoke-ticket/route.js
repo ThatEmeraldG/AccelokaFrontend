@@ -1,18 +1,16 @@
-import { NextResponse } from "next/server";
-
 export async function DELETE(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const bookedTicketId = searchParams.get("bookedTicketId");
-    const ticketCode = searchParams.get("ticketCode");
-    const qty = searchParams.get("qty");
+    const body = await req.json();
+    const { bookedTicketId, ticketCode, qty } = body;
 
     if (!bookedTicketId || !ticketCode || !qty) {
       return NextResponse.json({ error: "Missing revoke-ticket parameters" }, { status: 400 });
     }
 
-    const response = await fetch(`http://localhost:5261/api/v1/revoke-ticket/${bookedTicketId}/${ticketCode}/${qty}`, {
-      method: "DELETE",
+    var apiUrl = `http://localhost:5261/api/v1/revoke-ticket/${bookedTicketId}/${ticketCode}/${qty}`;
+
+    const response = await fetch(apiUrl, {
+      method: "DELETE"
     });
 
     if (!response.ok) {
