@@ -12,12 +12,12 @@ export async function POST(req) {
     body.EventStart = new Date(body.EventStart).toISOString();
     body.EventEnd = new Date(body.EventEnd).toISOString();
 
-    const response = await fetch("http://localhost:5261/api/v1/user/create-user", {
+    const response = await fetch("http://localhost:5261/api/v1/book-ticket", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify([body]),
     });
 
     if (!response.ok) {
